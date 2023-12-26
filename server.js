@@ -1,91 +1,58 @@
-// server.js
 const express = require('express');
-const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
-const uri = "mongodb://localhost:27017";
-const client = new MongoClient(uri);
-const multer  = require('multer')
-
+const mongoose = require('mongoose');
+const multer = require('multer');
 const cors = require('cors');
+const fs = require('fs');
 const app = express();
+const upload = multer();
 
 app.use(cors());
-
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
-global.titleImageName = "";
-global.albumImages = {};
+mongoose.connect('mongodb+srv://kasarschetan1122:CUhAtAZZCzo4eg7g@cluster0.6xbessh.mongodb.net/?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
-app.use(cors());
-
-const storage = multer.diskStorage({
-  destination: function(req, file, cb){
-    cb(null, "./images");
-  },
-  filename: function(req, file, cb){
-    const uniqueSuffix = Date.now();
-    cb(null, uniqueSuffix + file.originalname);
-  },
+// Create a Mongoose schema for storing image data as BinData
+const ImageSchema = new mongoose.Schema({
+  data:Buffer
 });
 
-const upload = multer({ storage: storage });
-app.use(bodyParser.json());
+const Image = mongoose.model('Image', ImageSchema);
 
-/*app.post('/add', async (req, res) => {
-
-    const database = client.db("mydb");
-    const mycollection = database.collection("mycollection");
-    req.body.userData.titleData.titleImage = global.titleImageName;
-    req.body.userData.albumData.photos = albumImages;
-    const result = await mycollection.insertOne(req.body.userData);
-
-    // console.log(global.imageName);
-
-    //res.json({ message: 'Data received on the server' });
+// Route to handle image upload
+app.post('/uploadImage', upload.single('file'), (req, res) => {
+  console.log(req.file.buffer);
+  const fileData = req.file.buffer;
+  const newFile = new Image({ data: fileData });
+  newFile.save();
+  res.send("Data received");
 });
 
-app.get('/get', async (req, res) => {
+app.get('/getImage', async (req, res) => {
+  try {
+    // Find the stored image document in the database
+    const storedImage = await Image.findOne();
 
-  const database = client.db("mydb");
-  const mycollection = database.collection("mycollection");
+    const base64Image = storedImage.data.toString('base64'); 
+    const dataUrl = `data:image/jpeg;base64,${base64Image}`;
+    console.log(dataUrl);
 
-  const result = await mycollection.find({}).toArray();
-  res.json(result);
+    if (!storedImage) {
+      return res.status(404).send('No image found.');
+    }
 
-  console.log(result);
-
-});*/
-
-app.post('/upload', upload.single("titleImage"), async (req, res) => {
-
-  if(req.file)
-  global.titleImageName = req.file.filename;
-
-  else
-  global.titleImageName = "Travel.jpg";
-
-  res.send("Upload is working");
-
+    //res.contentType('image/jpeg');
+   
+    res.send(dataUrl);
+  } catch (error) {
+    console.error('Error retrieving image:', error);
+    res.status(500).send('Error retrieving image.');
+  }
 });
 
-/*app.post('/album', upload.array("photoAlbum", 30), async (req, res, next) => {
-
-   const database = client.db("mydb");
-   const mycollection = database.collection("mycollection");
-
-   //global.albumImages = req.files.filename;
-    const doc = req.files.map(e=>(e.filename));
-    const doc1 = doc.map(e=>({e}));
-    global.albumImages = doc1;
-    //const result = await mycollection.insertOne({doc1});
-});*/
-
-
-const PORT = 9000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(5000, () => {
+  console.log('Server is running');
 });
