@@ -35,10 +35,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 app.use(bodyParser.json());
 
-app.use("/",(req, res)=>{
-  res.send("Home is Working");
-});
-
 /*app.post('/add', async (req, res) => {
 
     const database = client.db("mydb");
