@@ -28,7 +28,7 @@ const upload = multer({ storage: storage });
 app.use(bodyParser.json());
 
 app.use("/",(req, res)=>{
-  res.send("Home is Working)
+  res.send("Home is Working");
 });
 
 /*app.post('/add', async (req, res) => {
