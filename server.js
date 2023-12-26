@@ -72,6 +72,8 @@ app.post('/upload', upload.single("titleImage"), async (req, res) => {
   else
   global.titleImageName = "Travel.jpg";
 
+  res.send("Upload is working");
+
 });
 
 /*app.post('/album', upload.array("photoAlbum", 30), async (req, res, next) => {
