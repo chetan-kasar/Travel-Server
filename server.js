@@ -16,7 +16,7 @@ app.use(cors());
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb){
-    cb(null, "../travel-log-app/src/images");
+    cb(null, "./images");
   },
   filename: function(req, file, cb){
     const uniqueSuffix = Date.now();
@@ -54,7 +54,7 @@ app.get('/get', async (req, res) => {
 
   console.log(result);
 
-});
+});*/
 
 app.post('/upload', upload.single("titleImage"), async (req, res) => {
 
@@ -66,7 +66,7 @@ app.post('/upload', upload.single("titleImage"), async (req, res) => {
 
 });
 
-app.post('/album', upload.array("photoAlbum", 30), async (req, res, next) => {
+/*app.post('/album', upload.array("photoAlbum", 30), async (req, res, next) => {
 
    const database = client.db("mydb");
    const mycollection = database.collection("mycollection");
